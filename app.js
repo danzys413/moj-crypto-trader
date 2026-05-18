@@ -22,7 +22,7 @@ const GEMINI_API_KEY = "AIzaSyB8SVyocN_R-dZ8Lx4e-9lIZJfchqzfO7I";
 async function uruchomAnalizeAI() {
     statusText.innerText = "Status: Pobieranie świeżych danych z Binance...";
     
-    const binanceUrl = 'https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=20';
+    const binanceUrl = 'https://api.allorigins.win/raw?url=https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=20';
 
     try {
         const responseBinance = await fetch(binanceUrl);
