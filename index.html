@@ -11,12 +11,45 @@
             color: #ffffff;
             margin: 0;
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 90vh;
         }
         h1 { text-align: center; margin-bottom: 30px; color: #00ff88; }
-        .main-layout {
+        
+        /* EKRAN LOGOWANIA */
+        #login-container {
+            background-color: #1a1a1e;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            text-align: center;
+            max-width: 350px;
+            width: 100%;
+        }
+        #login-container h2 { margin-top: 0; color: #00ff88; font-size: 22px; }
+        #login-container p { color: #aaa; font-size: 14px; margin-bottom: 20px; }
+        #server-password {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #444;
+            background-color: #121214;
+            color: white;
+            font-size: 16px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        /* GŁÓWNY PANEL (UKRYTY PRZED LOGOWANIEM) */
+        #main-layout {
             max-width: 650px;
+            width: 100%;
             margin: 0 auto;
-            display: flex;
+            display: none; /* Skrypt JS to włączy po poprawnym haśle */
             flex-direction: column;
             gap: 20px;
         }
@@ -26,9 +59,10 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .signal-box { border-left: 5px solid #00ff88; }
+        .signal-box { border-left: 5px solid #00ff88; margin-bottom: 20px; }
         .signal-box.strategy-2 { border-left: 5px solid #00bcff; }
         
+        /* PRZYCISKI */
         button {
             background-color: #00ff88;
             color: #000;
@@ -50,9 +84,15 @@
 </head>
 <body>
 
-    <h1>Crypto AI Trader Platform (4H)</h1>
+    <div id="login-container">
+        <h2>🔒 Panel Zabezpieczony</h2>
+        <p>Wprowadź hasło serwera, aby uzyskać dostęp do bota AI.</p>
+        <input type="password" id="server-password" placeholder="Wpisz hasło...">
+        <button onclick="zaloguj()">Zaloguj się</button>
+    </div>
 
-    <div class="main-layout">
+    <div id="main-layout">
+        <h1>Crypto AI Trader Platform (4H)</h1>
         
         <div class="control-box">
             <button id="fetch-btn">Generuj Analizę Obu Strategii</button>
