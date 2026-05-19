@@ -35,8 +35,8 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
-        // Oficjalny punkt dostępowy v1 dla modelu gemini-1.5-flash
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // POPRAWKA: Wskazanie na oficjalną, stabilną i aktualną wersję gemini-1.5-flash-latest
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(url, {
             method: 'POST',
@@ -50,7 +50,6 @@ Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
         const geminiData = await geminiRes.json();
 
-        // Lepsza obsługa błędów, żeby nie wywalało [object Object]
         if (geminiData.error) {
             return res.status(500).json({ error: geminiData.error.message || "Błąd z API Gemini." });
         }
