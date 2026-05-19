@@ -44,12 +44,12 @@
             text-align: center;
         }
         
-        /* GŁÓWNY PANEL (UKRYTY PRZED LOGOWANIEM) */
+        /* GŁÓWNY PANEL */
         #main-layout {
             max-width: 650px;
             width: 100%;
             margin: 0 auto;
-            display: none; /* Skrypt JS to włączy po poprawnym haśle */
+            display: none;
             flex-direction: column;
             gap: 20px;
         }
@@ -62,7 +62,6 @@
         .signal-box { border-left: 5px solid #00ff88; margin-bottom: 20px; }
         .signal-box.strategy-2 { border-left: 5px solid #00bcff; }
         
-        /* PRZYCISKI */
         button {
             background-color: #00ff88;
             color: #000;
@@ -101,22 +100,22 @@
 
         <div class="signal-box">
             <h3 class="strategy-title" style="color: #00ff88;">Strategia 1: Price Action</h3>
-            <p class="direction-badge">KIERUNEK: --</p>
-            <p><strong>EP (Entry Price):</strong> --</p>
-            <p><strong>TP (Take Profit):</strong> --</p>
-            <p><strong>Prawdopodobieństwo TP:</strong> --</p> 
-            <p><strong>SL (Stop Loss):</strong> --</p>
-            <p><strong>Uzasadnienie:</strong> Brak danych.</p>
+            <p class="direction-badge" id="s1-kierunek">KIERUNEK: --</p>
+            <p><strong>EP (Entry Price):</strong> $<span id="s1-ep">--</span></p>
+            <p><strong>TP (Take Profit):</strong> $<span id="s1-tp">--</span></p>
+            <p><strong>Prawdopodobieństwo TP:</strong> <span id="s1-prob">--</span></p> 
+            <p><strong>SL (Stop Loss):</strong> $<span id="s1-sl">--</span></p>
+            <p><strong>Uzasadnienie:</strong> <span id="s1-desc">Brak danych.</span></p>
         </div>
 
         <div class="signal-box strategy-2">
             <h3 class="strategy-title" style="color: #00bcff;">Strategia 2: Matematyczna (EMA/RSI)</h3>
-            <p class="direction-badge">KIERUNEK: --</p>
-            <p><strong>EP (Entry Price):</strong> --</p>
-            <p><strong>TP (Take Profit):</strong> --</p>
-            <p><strong>Prawdopodobieństwo TP:</strong> --</p> 
-            <p><strong>SL (Stop Loss):</strong> --</p>
-            <p><strong>Uzasadnienie:</strong> Brak danych.</p>
+            <p class="direction-badge" id="s2-kierunek">KIERUNEK: --</p>
+            <p><strong>EP (Entry Price):</strong> $<span id="s2-ep">--</span></p>
+            <p><strong>TP (Take Profit):</strong> $<span id="s2-tp">--</span></p>
+            <p><strong>Prawdopodobieństwo TP:</strong> <span id="s2-prob">--</span></p> 
+            <p><strong>SL (Stop Loss):</strong> $<span id="s2-sl">--</span></p>
+            <p><strong>Uzasadnienie:</strong> <span id="s2-desc">Brak danych.</span></p>
         </div>
     </div>
 
