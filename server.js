@@ -3,8 +3,8 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Konfiguracja Twojego tajnego hasła do strony
-const TAJNE_HASLO = "TwojeHaslo123"; 
+// Zaktualizowane Twoje tajne hasło do weryfikacji serwerowej
+const TAJNE_HASLO = "20021990"; 
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
@@ -48,7 +48,7 @@ Zwróć odpowiedź WYŁĄCZNIE jako czysty, poprawny obiekt JSON, bez żadnego d
 
 Oto dane świec z giełdy: ${JSON.stringify(klines)}`;
 
-        // Oficjalny endpoint URL dla modelu gemini-1.5-flash (stabilny i szybki strukturalnie)
+        // Oficjalny endpoint URL dla modelu gemini-1.5-flash
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(url, {
