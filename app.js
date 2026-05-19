@@ -2,12 +2,11 @@ const loginContainer = document.getElementById('login-container');
 const mainLayout = document.getElementById('main-layout');
 const statusText = document.getElementById('status-text');
 
-// Twoje hasło wpisane na stałe do automatycznego logowania
+// Twoje zapisane hasło do automatycznego logowania
 const MOJE_HASLO = "20021990";
 
-// Obsługa logowania na serwerze
+// Funkcja logująca użytkownika na serwerze
 async function zaloguj(wymuszoneHaslo = null) {
-    // Jeśli podano hasło w argumencie (np. automatyczne), używamy go. W innym wypadku bierzemy z pola input.
     const passwordInput = wymuszoneHaslo || document.getElementById('server-password').value;
     
     try {
@@ -22,29 +21,30 @@ async function zaloguj(wymuszoneHaslo = null) {
             sessionStorage.setItem('isLogged', 'true');
             weryfikujDostep();
         } else {
-            // Pokazuj błąd tylko, jeśli użytkownik wpisywał coś ręcznie
             if (!wymuszoneHaslo) alert('Niepoprawne hasło!');
         }
     } catch (e) {
-        console.error('Błąd połączenia z serwerem logowania', e);
+        console.error('Błąd połączenia podczas logowania:', e);
     }
 }
 
-// Funkcja sprawdzająca status zalogowania i wywołująca automat
+// Funkcja zarządzająca widocznością paneli
 function weryfikujDostep() {
     if (sessionStorage.getItem('isLogged') === 'true') {
         if (loginContainer) loginContainer.style.display = 'none';
         if (mainLayout) mainLayout.style.display = 'flex';
     } else {
-        // Jeśli nie jest zalogowany, automatycznie wysyłamy Twoje stałe hasło
+        if (loginContainer) loginContainer.style.display = 'block';
+        if (mainLayout) mainLayout.style.display = 'none';
+        // Automatyczne wywołanie logowania Twoim hasłem
         zaloguj(MOJE_HASLO);
     }
 }
 
-// Start weryfikacji i autologowania przy ładowaniu strony
+// Uruchomienie procedury sprawdzania dostępu na starcie
 weryfikujDostep();
 
-// Główna funkcja analizy pobierająca dane przez nasz serwer
+// Funkcja pobierania analizy tradingowej z serwera
 async function uruchomAnalizeAI() {
     statusText.innerHTML = "Status: Serwer przetwarza zapytanie i pobiera dane z giełdy...";
     
@@ -57,16 +57,16 @@ async function uruchomAnalizeAI() {
             return;
         }
         
-        // Wyciągamy i czyścimy tekst ze znaczników kodu markdown
+        // Czyszczenie tekstu z ewentualnych znaczników markdownu, jeśli AI je dodało
         let tekstAI = data.rawText;
         tekstAI = tekstAI.replace(/```json/gi, '').replace(/```/g, '').trim();
         
-        // Parsujemy odpowiedź na obiekt
+        // Przekształcenie tekstu na obiekt JSON
         const analiza = JSON.parse(tekstAI);
         
         statusText.innerHTML = "Status: Analiza ukończona pomyślnie!";
         
-        // --- WYŚWIETLANIE STRATEGII 1 ---
+        // --- ODŚWIEŻENIE STRATEGII 1 (PRICE ACTION) ---
         const s1Kierunek = analiza.s1.kierunek.toUpperCase();
         const s1Color = s1Kierunek.includes('LONG') ? '#00ff88' : '#ff4444';
         const s1Emoji = s1Kierunek.includes('LONG') ? '🟢' : '🔴';
@@ -78,7 +78,7 @@ async function uruchomAnalizeAI() {
         document.getElementById('s1-sl').innerText = analiza.s1.sl;
         document.getElementById('s1-desc').innerText = analiza.s1.uzasadnienie;
         
-        // --- WYŚWIETLANIE STRATEGII 2 ---
+        // --- ODŚWIEŻENIE STRATEGII 2 (MATEMATYCZNA) ---
         const s2Kierunek = analiza.s2.kierunek.toUpperCase();
         const s2Color = s2Kierunek.includes('LONG') ? '#00ff88' : '#ff4444';
         const s2Emoji = s2Kierunek.includes('LONG') ? '🟢' : '🔴';
@@ -91,14 +91,15 @@ async function uruchomAnalizeAI() {
         document.getElementById('s2-desc').innerText = analiza.s2.uzasadnienie;
 
     } catch (error) {
-        statusText.innerHTML = "Status: Błąd formatowania danych JSON od AI.";
+        statusText.innerHTML = "Status: Błąd parsowania struktury danych JSON.";
         console.error("Szczegóły błędu:", error);
     }
 }
 
-// Podpięcie przycisków i zdarzeń
+// Rejestracja kliknięcia w przycisk generowania
 document.getElementById('fetch-btn').addEventListener('click', uruchomAnalizeAI);
 
+// Możliwość ręcznego wpisania i zatwierdzenia hasła enterem
 document.getElementById('server-password').addEventListener('keypress', function (e) {
     if (e.key === 'Enter') {
         zaloguj();
