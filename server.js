@@ -1,8 +1,5 @@
 const express = require('express');
 const path = require('path');
-// Zmiana importu na oficjalny standard GoogleGenAI
-const { GoogleGenAI } = require('@google/generative-ai');
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -16,16 +13,12 @@ app.post('/api/analyze', async (req, res) => {
             return res.status(500).json({ error: "Brak klucza API (GEMINI_API_KEY) w Environment na Renderze!" });
         }
 
-        // 1. Pobieranie danych rynkowych z Binance
+        // 1. Pobieranie danych z Binance
         const binanceRes = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=20');
         if (!binanceRes.ok) {
-            return res.status(500).json({ error: "Nie udało się pobrać danych z giełdy Binance." });
+            return res.status(500).json({ error: "Nie udało się pobrać danych z Binance." });
         }
         const klines = await binanceRes.json();
-
-        // 2. POPRAWIONA INICJALIZACJA API GOOGLE
-        const ai = new GoogleGenAI({ apiKey: apiKey });
-        const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const promptText = `Jesteś profesjonalnym algorytmem tradera giełdowego. Przeanalizuj poniższe świece 4H dla pary BTC/USDT.
 Wytwórz dwie niezależne, logiczne analizy tradingowe:
@@ -40,12 +33,31 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
-        // 3. Wywołanie modelu
-        const result = await model.generateContent(promptText);
-        const response = await result.response;
-        const responseText = response.text();
-        
-        return res.json({ success: true, rawText: responseText });
+        // 2. Czysty, bezpośredni punkt końcowy API Gemini (v1beta)
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+        const geminiRes = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: promptText }]
+                }]
+            })
+        });
+
+        const geminiData = await geminiRes.json();
+
+        if (geminiData.error) {
+            return res.status(500).json({ error: geminiData.error.message || "Błąd API Gemini." });
+        }
+
+        if (!geminiData.candidates || !geminiData.candidates[0] || !geminiData.candidates[0].content) {
+            return res.status(500).json({ error: "Gemini zwróciło pustą odpowiedź." });
+        }
+
+        const tekstOdAI = geminiData.candidates[0].content.parts[0].text;
+        return res.json({ success: true, rawText: tekstOdAI });
 
     } catch (error) {
         console.error("Błąd serwera:", error);
@@ -58,5 +70,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Serwer wystartował poprawnie na porcie ${PORT}`);
+    console.log(`Serwer działa poprawnie na porcie ${PORT}`);
 });
