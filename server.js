@@ -10,13 +10,13 @@ app.post('/api/analyze', async (req, res) => {
     try {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
-            return res.status(500).json({ error: "Brak klucza API (GEMINI_API_KEY) w Environment na Renderze!" });
+            return res.status(500).json({ error: "Brak klucza API w ustawieniach Environment na Renderze!" });
         }
 
-        // 1. Pobieranie danych z Binance
+        // 1. Pobieranie danych rynkowych z Binance
         const binanceRes = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=20');
         if (!binanceRes.ok) {
-            return res.status(500).json({ error: "Nie udało się pobrać danych z Binance." });
+            return res.status(500).json({ error: "Nie udało się pobrać danych z giełdy Binance." });
         }
         const klines = await binanceRes.json();
 
@@ -33,8 +33,8 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
-        // 2. Czysty, bezpośredni punkt końcowy API Gemini (v1beta)
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+        // Stabilny, produkcyjny url v1 z modelem bazowym gemini-pro (najbardziej bezawaryjny na serwerach cloud)
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(url, {
             method: 'POST',
@@ -48,12 +48,14 @@ Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
         const geminiData = await geminiRes.json();
 
+        // Bezpieczne sprawdzanie błędów z Google, zapobiegające wyświetlaniu [object Object]
         if (geminiData.error) {
-            return res.status(500).json({ error: geminiData.error.message || "Błąd API Gemini." });
+            const errorMsg = geminiData.error.message || JSON.stringify(geminiData.error);
+            return res.status(500).json({ error: `Błąd Google API: ${errorMsg}` });
         }
 
         if (!geminiData.candidates || !geminiData.candidates[0] || !geminiData.candidates[0].content) {
-            return res.status(500).json({ error: "Gemini zwróciło pustą odpowiedź." });
+            return res.status(500).json({ error: "Model zwrócił pustą odpowiedź lub został zablokowany." });
         }
 
         const tekstOdAI = geminiData.candidates[0].content.parts[0].text;
@@ -61,7 +63,7 @@ Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
     } catch (error) {
         console.error("Błąd serwera:", error);
-        return res.status(500).json({ error: error.message });
+        return res.status(500).json({ error: error.message || "Nieznany błąd serwera." });
     }
 });
 
@@ -70,5 +72,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Serwer działa poprawnie na porcie ${PORT}`);
+    console.log(`Serwer działa na porcie ${PORT}`);
 });
