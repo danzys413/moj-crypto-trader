@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+// Zmiana importu na oficjalny standard GoogleGenAI
 const { GoogleGenAI } = require('@google/generative-ai');
 
 const app = express();
@@ -15,14 +16,14 @@ app.post('/api/analyze', async (req, res) => {
             return res.status(500).json({ error: "Brak klucza API (GEMINI_API_KEY) w Environment na Renderze!" });
         }
 
-        // 1. Pobieranie danych rynkowych z Binance (ostatnie 20 świec 4H)
+        // 1. Pobieranie danych rynkowych z Binance
         const binanceRes = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=4h&limit=20');
         if (!binanceRes.ok) {
             return res.status(500).json({ error: "Nie udało się pobrać danych z giełdy Binance." });
         }
         const klines = await binanceRes.json();
 
-        // 2. Inicjalizacja oficjalnego API Google
+        // 2. POPRAWIONA INICJALIZACJA API GOOGLE
         const ai = new GoogleGenAI({ apiKey: apiKey });
         const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
@@ -40,11 +41,10 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
         // 3. Wywołanie modelu
-        const result = await model.generateContent({
-            contents: [{ role: 'user', parts: [{ text: promptText }] }]
-        });
-
-        const responseText = result.response.text();
+        const result = await model.generateContent(promptText);
+        const response = await result.response;
+        const responseText = response.text();
+        
         return res.json({ success: true, rawText: responseText });
 
     } catch (error) {
