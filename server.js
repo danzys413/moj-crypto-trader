@@ -35,8 +35,8 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
-        // POPRAWKA: Wskazanie na oficjalną, stabilną i aktualną wersję gemini-1.5-flash-latest
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+        // UNIWERSALNY ENDPOINT: Zmiana na stabilny model produkcyjny gemini-1.5-pro w standardowej strukturze v1
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-pro:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(url, {
             method: 'POST',
@@ -55,7 +55,7 @@ Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
         }
 
         if (!geminiData.candidates || !geminiData.candidates[0] || !geminiData.candidates[0].content) {
-            return res.status(500).json({ error: "Gemini zwróciło pustą odpowiedź. Spróbuj ponownie." });
+            return res.status(500).json({ error: "Gemini zwróciło niepełne dane. Spróbuj ponownie za chwilę." });
         }
 
         const tekstOdAI = geminiData.candidates[0].content.parts[0].text;
