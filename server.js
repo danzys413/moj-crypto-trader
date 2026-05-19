@@ -3,26 +3,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Twoje stałe hasło dostępowe do panelu
-const TAJNE_HASLO = "20021990"; 
-
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
-
-// Endpoint logowania
-app.post('/api/login', (req, res) => {
-    const { password } = req.body;
-    if (password === TAJNE_HASLO) {
-        return res.json({ success: true });
-    } else {
-        return res.status(401).json({ success: false, message: "Błędne hasło!" });
-    }
-});
 
 // Bezpieczny endpoint pośredniczący do Gemini
 app.post('/api/analyze', async (req, res) => {
     try {
-        // Serwer bezpiecznie pobiera nowy klucz z panelu Render
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             return res.status(500).json({ error: "Brak klucza API w ustawieniach Environment na Renderze!" });
@@ -49,8 +35,8 @@ Odpowiedź musisz zwrócić WYŁĄCZNIE jako czysty, poprawny obiekt JSON. Nie d
 
 Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
-        // Stabilny, oficjalny endpoint produkcyjny v1
-        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${apiKey}`;
+        // Oficjalny punkt dostępowy v1 dla modelu gemini-1.5-flash
+        const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
         const geminiRes = await fetch(url, {
             method: 'POST',
@@ -64,19 +50,20 @@ Oto surowe dane świec z Binance: ${JSON.stringify(klines)}`;
 
         const geminiData = await geminiRes.json();
 
+        // Lepsza obsługa błędów, żeby nie wywalało [object Object]
         if (geminiData.error) {
-            return res.status(500).json({ error: geminiData.error.message || "Błąd API Gemini." });
+            return res.status(500).json({ error: geminiData.error.message || "Błąd z API Gemini." });
         }
 
         if (!geminiData.candidates || !geminiData.candidates[0] || !geminiData.candidates[0].content) {
-            return res.status(500).json({ error: "Gemini zwróciło niepełną strukturę danych." });
+            return res.status(500).json({ error: "Gemini zwróciło pustą odpowiedź. Spróbuj ponownie." });
         }
 
         const tekstOdAI = geminiData.candidates[0].content.parts[0].text;
         return res.json({ success: true, rawText: tekstOdAI });
 
     } catch (error) {
-        return res.status(500).json({ error: "Błąd serwera: " + error.message });
+        return res.status(500).json({ error: error.message });
     }
 });
 
@@ -85,5 +72,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Serwer działa poprawnie na porcie ${PORT}`);
+    console.log(`Serwer działa na porcie ${PORT}`);
 });
